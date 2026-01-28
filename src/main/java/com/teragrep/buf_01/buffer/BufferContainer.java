@@ -55,15 +55,15 @@ public interface BufferContainer {
     /**
      * @return id of the buffer
      */
-    long id();
+    public abstract long id();
 
     /**
      * @return encapsulated {@link ByteBuffer}.
      */
-    ByteBuffer buffer();
+    public abstract ByteBuffer buffer();
 
     /**
      * @return is this a stub implementation.
      */
-    boolean isStub();
+    public abstract boolean isStub();
 }

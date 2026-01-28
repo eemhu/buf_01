@@ -55,35 +55,35 @@ public interface BufferLease {
     /**
      * @return identity of the decorated {@link BufferContainer}.
      */
-    long id();
+    public abstract long id();
 
     /**
      * @return current reference count.
      */
-    long refs();
+    public abstract long refs();
 
     /**
      * @return encapsulated buffer of the {@link BufferContainer}.
      */
-    ByteBuffer buffer();
+    public abstract ByteBuffer buffer();
 
     /**
      * Add reference, throws {@link IllegalStateException} if lease has expired.
      */
-    void addRef() throws IllegalStateException;
+    public abstract void addRef() throws IllegalStateException;
 
     /**
      * Remove reference, throws {@link IllegalStateException} if lease has expired.
      */
-    void removeRef() throws IllegalStateException;
+    public abstract void removeRef() throws IllegalStateException;
 
     /**
      * @return status of the lease, {@code true} indicates that the lease has expired.
      */
-    boolean isTerminated();
+    public abstract boolean isTerminated();
 
     /**
      * @return is this a stub implementation.
      */
-    boolean isStub();
+    public abstract boolean isStub();
 }
