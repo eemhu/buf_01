@@ -70,8 +70,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Non-blocking pool for {@link MemorySegmentContainer} objects. All objects in the pool are {@link ByteBuffer#clear()}ed
- * before returning to the pool by {@link MemorySegmentLease}.
+ * Non-blocking pool for {@link MemorySegmentContainer} objects. All objects in the pool are
+ * {@link ByteBuffer#clear()}ed before returning to the pool by {@link MemorySegmentLease}.
  */
 public final class DebugMemorySegmentLeasePool implements MemorySegmentLeasePool {
     // TODO create tests
@@ -111,10 +111,7 @@ public final class DebugMemorySegmentLeasePool implements MemorySegmentLeasePool
             // if queue is empty or stub object, create a new BufferContainer and BufferLease.
             final MemorySegmentSupplier supplier = new ArenaMemorySegmentSupplier(Arena.ofAuto(), segmentSize);
             final long id = bufferId.incrementAndGet();
-            memorySegmentLease = new MemorySegmentLeaseImpl(
-                    new MemorySegmentContainerImpl(id, supplier.get()),
-                    this
-            );
+            memorySegmentLease = new MemorySegmentLeaseImpl(new MemorySegmentContainerImpl(id, supplier.get()), this);
             suppliers.put(id, supplier);
         }
         else {
@@ -125,7 +122,8 @@ public final class DebugMemorySegmentLeasePool implements MemorySegmentLeasePool
         if (LOGGER.isDebugEnabled()) {
             LOGGER
                     .debug(
-                            "returning bufferLease id <{}> with refs <{}>", memorySegmentLease.id(), memorySegmentLease.refs()
+                            "returning bufferLease id <{}> with refs <{}>", memorySegmentLease.id(),
+                            memorySegmentLease.refs()
                     );
         }
 
@@ -158,7 +156,7 @@ public final class DebugMemorySegmentLeasePool implements MemorySegmentLeasePool
      * return {@link MemorySegmentContainer} into the pool.
      * 
      * @param memorySegmentContainer {@link MemorySegmentContainer} from {@link MemorySegmentLease} which has been
-     *                        {@link ByteBuffer#clear()}ed.
+     *                               {@link ByteBuffer#clear()}ed.
      */
     @Override
     public void internalOffer(MemorySegmentContainer memorySegmentContainer) {
@@ -188,8 +186,8 @@ public final class DebugMemorySegmentLeasePool implements MemorySegmentLeasePool
     }
 
     /**
-     * Closes the {@link DebugMemorySegmentLeasePool}, deallocating currently residing {@link MemorySegmentContainer}s and future ones when
-     * returned.
+     * Closes the {@link DebugMemorySegmentLeasePool}, deallocating currently residing {@link MemorySegmentContainer}s
+     * and future ones when returned.
      */
     public void close() {
         LOGGER.debug("close called");

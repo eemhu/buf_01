@@ -57,9 +57,9 @@ import java.util.List;
 import java.util.concurrent.Phaser;
 
 /**
- * Decorator for {@link MemorySegmentContainer} that automatically clears (frees) the encapsulated {@link ByteBuffer} and
- * returns the {@link MemorySegmentContainer} to {@link MemorySegmentLeasePoolImpl} when reference count hits zero. Starts with one
- * initial reference. Internally uses a {@link Phaser} to track reference count in a non-blocking way.
+ * Decorator for {@link MemorySegmentContainer} that automatically clears (frees) the encapsulated {@link ByteBuffer}
+ * and returns the {@link MemorySegmentContainer} to {@link MemorySegmentLeasePoolImpl} when reference count hits zero.
+ * Starts with one initial reference. Internally uses a {@link Phaser} to track reference count in a non-blocking way.
  */
 public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
 
@@ -69,7 +69,11 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
     private final List<MemorySegmentLease> subLeases;
     private final MemorySegmentLease parentLease;
 
-    public MemorySegmentLeaseImpl(MemorySegmentContainer bc, MemorySegmentLeasePool memorySegmentLeasePool, MemorySegmentLease parentLease) {
+    public MemorySegmentLeaseImpl(
+            MemorySegmentContainer bc,
+            MemorySegmentLeasePool memorySegmentLeasePool,
+            MemorySegmentLease parentLease
+    ) {
         this.memorySegmentContainer = bc;
         this.memorySegmentLeasePool = memorySegmentLeasePool;
 
@@ -85,10 +89,14 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
 
     @Override
     public MemorySegmentLease sliced(final long committedOffset) {
-        final MemorySegmentLease newSubLease =  new MemorySegmentLeaseImpl(new MemorySegmentContainerImpl(
-                memorySegmentContainer.id(),
-                memorySegmentContainer.memorySegment().asSlice(committedOffset)
-        ), memorySegmentLeasePool, this);
+        final MemorySegmentLease newSubLease = new MemorySegmentLeaseImpl(
+                new MemorySegmentContainerImpl(
+                        memorySegmentContainer.id(),
+                        memorySegmentContainer.memorySegment().asSlice(committedOffset)
+                ),
+                memorySegmentLeasePool,
+                this
+        );
 
         subLeases.add(newSubLease);
 
@@ -133,7 +141,9 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
     @Override
     public void removeRef() {
         if (phaser.arriveAndDeregister() < 0) {
-            throw new IllegalStateException("Cannot remove reference, MemorySegmentLease phaser was already terminated!");
+            throw new IllegalStateException(
+                    "Cannot remove reference, MemorySegmentLease phaser was already terminated!"
+            );
         }
 
         if (phaser.getRegisteredParties() == 0 && !parentLease.isStub()) {
@@ -167,7 +177,8 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
                 memorySegment().fill((byte) 0);
                 memorySegmentLeasePool.internalOffer(memorySegmentContainer);
                 shouldTerminate = true;
-            } else {
+            }
+            else {
                 shouldTerminate = false;
             }
 

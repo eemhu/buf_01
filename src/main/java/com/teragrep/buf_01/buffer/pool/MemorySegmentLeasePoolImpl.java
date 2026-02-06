@@ -68,8 +68,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Non-blocking pool for {@link MemorySegmentContainer} objects. All objects in the pool are {@link ByteBuffer#clear()}ed
- * before returning to the pool by {@link MemorySegmentLease}.
+ * Non-blocking pool for {@link MemorySegmentContainer} objects. All objects in the pool are
+ * {@link ByteBuffer#clear()}ed before returning to the pool by {@link MemorySegmentLease}.
  */
 public final class MemorySegmentLeasePoolImpl implements MemorySegmentLeasePool {
     // TODO create tests
@@ -112,7 +112,8 @@ public final class MemorySegmentLeasePoolImpl implements MemorySegmentLeasePool 
                     new MemorySegmentContainerImpl(bufferId.incrementAndGet(), memorySegmentSupplier.get()),
                     this
             );
-        } else {
+        }
+        else {
             // otherwise, wrap bufferContainer with phaser decorator (bufferLease)
             memorySegmentLease = new MemorySegmentLeaseImpl(memorySegmentContainer, this);
         }
@@ -120,7 +121,8 @@ public final class MemorySegmentLeasePoolImpl implements MemorySegmentLeasePool 
         if (MemorySegmentLeasePoolImpl.LOGGER.isDebugEnabled()) {
             MemorySegmentLeasePoolImpl.LOGGER
                     .debug(
-                            "returning bufferLease id <{}> with refs <{}>", memorySegmentLease.id(), memorySegmentLease.refs()
+                            "returning bufferLease id <{}> with refs <{}>", memorySegmentLease.id(),
+                            memorySegmentLease.refs()
                     );
         }
 
@@ -154,7 +156,7 @@ public final class MemorySegmentLeasePoolImpl implements MemorySegmentLeasePool 
      * return {@link MemorySegmentContainer} into the pool.
      * 
      * @param memorySegmentContainer {@link MemorySegmentContainer} from {@link MemorySegmentLease} which has been
-     *                        {@link ByteBuffer#clear()}ed.
+     *                               {@link ByteBuffer#clear()}ed.
      */
     @Override
     public void internalOffer(MemorySegmentContainer memorySegmentContainer) {
@@ -183,8 +185,8 @@ public final class MemorySegmentLeasePoolImpl implements MemorySegmentLeasePool 
     }
 
     /**
-     * Closes the {@link MemorySegmentLeasePoolImpl}, deallocating currently residing {@link MemorySegmentContainer}s and future ones when
-     * returned.
+     * Closes the {@link MemorySegmentLeasePoolImpl}, deallocating currently residing {@link MemorySegmentContainer}s
+     * and future ones when returned.
      */
     @Override
     public void close() {
