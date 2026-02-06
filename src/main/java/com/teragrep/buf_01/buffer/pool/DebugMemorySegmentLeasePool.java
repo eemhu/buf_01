@@ -43,36 +43,42 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.buf_01.buffer;
+package com.teragrep.buf_01.buffer.pool;
 
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainer;
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainerImpl;
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainerStub;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLease;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLeaseImpl;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLeaseStub;
 import com.teragrep.buf_01.buffer.supply.ArenaMemorySegmentSupplier;
 import com.teragrep.buf_01.buffer.supply.MemorySegmentSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 /**
  * Non-blocking pool for {@link MemorySegmentContainer} objects. All objects in the pool are {@link ByteBuffer#clear()}ed
  * before returning to the pool by {@link MemorySegmentLease}.
  */
-public final class MemorySegmentLeasePool {
+public final class DebugMemorySegmentLeasePool implements MemorySegmentLeasePool {
     // TODO create tests
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MemorySegmentLeasePool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DebugMemorySegmentLeasePool.class);
 
-    private final MemorySegmentSupplier memorySegmentSupplier;
+    private final Map<Long, MemorySegmentSupplier> suppliers = new ConcurrentHashMap<>();
 
     private final ConcurrentLinkedQueue<MemorySegmentContainer> queue;
 
@@ -87,9 +93,8 @@ public final class MemorySegmentLeasePool {
     private final Lock lock;
 
     // TODO check locking pattern, addRef in MemorySegmentLease can escape offer's check and cause dirty in pool?
-    public MemorySegmentLeasePool() {
+    public DebugMemorySegmentLeasePool() {
         this.segmentSize = 4096;
-        this.memorySegmentSupplier = new ArenaMemorySegmentSupplier(Arena.ofAuto(), segmentSize);
         this.queue = new ConcurrentLinkedQueue<>();
         this.memorySegmentLeaseStub = new MemorySegmentLeaseStub();
         this.memorySegmentContainerStub = new MemorySegmentContainerStub();
@@ -98,16 +103,19 @@ public final class MemorySegmentLeasePool {
         this.lock = new ReentrantLock();
     }
 
-    private MemorySegmentLease take() {
+    public MemorySegmentLease take() {
         // get or create
         MemorySegmentContainer memorySegmentContainer = queue.poll();
         MemorySegmentLease memorySegmentLease;
         if (memorySegmentContainer == null) {
             // if queue is empty or stub object, create a new BufferContainer and BufferLease.
+            final MemorySegmentSupplier supplier = new ArenaMemorySegmentSupplier(Arena.ofAuto(), segmentSize);
+            final long id = bufferId.incrementAndGet();
             memorySegmentLease = new MemorySegmentLeaseImpl(
-                    new MemorySegmentContainerImpl(bufferId.incrementAndGet(), memorySegmentSupplier.get()),
+                    new MemorySegmentContainerImpl(id, supplier.get()),
                     this
             );
+            suppliers.put(id, supplier);
         }
         else {
             // otherwise, wrap bufferContainer with phaser decorator (bufferLease)
@@ -152,10 +160,12 @@ public final class MemorySegmentLeasePool {
      * @param memorySegmentContainer {@link MemorySegmentContainer} from {@link MemorySegmentLease} which has been
      *                        {@link ByteBuffer#clear()}ed.
      */
-    void internalOffer(MemorySegmentContainer memorySegmentContainer) {
-        // Add buffer back to pool if it is not a stub object
+    @Override
+    public void internalOffer(MemorySegmentContainer memorySegmentContainer) {
+        // debug pool, instead of returning to pool arena is closed and memorySegment is discarded.
         if (!memorySegmentContainer.isStub()) {
-            queue.add(memorySegmentContainer);
+            MemorySegmentSupplier supplier = suppliers.get(memorySegmentContainer.id());
+            supplier.close(); // closes Arena
         }
 
         if (close.get()) {
@@ -178,7 +188,7 @@ public final class MemorySegmentLeasePool {
     }
 
     /**
-     * Closes the {@link MemorySegmentLeasePool}, deallocating currently residing {@link MemorySegmentContainer}s and future ones when
+     * Closes the {@link DebugMemorySegmentLeasePool}, deallocating currently residing {@link MemorySegmentContainer}s and future ones when
      * returned.
      */
     public void close() {
@@ -187,10 +197,6 @@ public final class MemorySegmentLeasePool {
 
         // close all that are in the pool right now
         internalOffer(memorySegmentContainerStub);
-
-        // close supplier
-        memorySegmentSupplier.close();
-
     }
 
     /**

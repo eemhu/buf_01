@@ -43,31 +43,27 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.buf_01.buffer;
+package com.teragrep.buf_01.buffer.container;
 
 import java.lang.foreign.MemorySegment;
 
 /**
- * Stub implementation of the {@link MemorySegmentContainer}.
+ * MemorySegmentContainer is a decorator for {@link MemorySegment} with an id.
  */
-public final class MemorySegmentContainerStub implements MemorySegmentContainer {
+public interface MemorySegmentContainer {
 
-    public MemorySegmentContainerStub() {
+    /**
+     * @return id of the MemorySegment
+     */
+    public abstract long id();
 
-    }
+    /**
+     * @return encapsulated {@link MemorySegment}.
+     */
+    public abstract MemorySegment memorySegment();
 
-    @Override
-    public long id() {
-        throw new IllegalStateException("MemorySegmentContainerStub does not have an id!");
-    }
-
-    @Override
-    public MemorySegment memorySegment() {
-        throw new IllegalStateException("MemorySegmentContainerStub does not allow access to the MemorySegment!");
-    }
-
-    @Override
-    public boolean isStub() {
-        return true;
-    }
+    /**
+     * @return is this a stub implementation.
+     */
+    public abstract boolean isStub();
 }

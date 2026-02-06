@@ -1,5 +1,9 @@
 package com.teragrep.buf_01.buffer;
 
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainerImpl;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLease;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLeaseImpl;
+import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePoolImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +17,7 @@ final class MemorySegmentLeaseTest {
         final MemorySegmentLease lease = new MemorySegmentLeaseImpl(
                 new MemorySegmentContainerImpl(
                         0L, MemorySegment.ofBuffer(ByteBuffer.allocateDirect(1024))
-                ), new MemorySegmentLeasePool()
+                ), new MemorySegmentLeasePoolImpl()
         );
 
         // refs starts at 1
@@ -44,7 +48,7 @@ final class MemorySegmentLeaseTest {
         final MemorySegmentLease lease = new MemorySegmentLeaseImpl(
                 new MemorySegmentContainerImpl(
                         0L, MemorySegment.ofBuffer(ByteBuffer.allocateDirect(1024))
-                ), new MemorySegmentLeasePool()
+                ), new MemorySegmentLeasePoolImpl()
         );
 
         // refs starts at 1

@@ -43,7 +43,12 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.buf_01.buffer;
+package com.teragrep.buf_01.buffer.lease;
+
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainer;
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainerImpl;
+import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePool;
+import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePoolImpl;
 
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
@@ -53,7 +58,7 @@ import java.util.concurrent.Phaser;
 
 /**
  * Decorator for {@link MemorySegmentContainer} that automatically clears (frees) the encapsulated {@link ByteBuffer} and
- * returns the {@link MemorySegmentContainer} to {@link MemorySegmentLeasePool} when reference count hits zero. Starts with one
+ * returns the {@link MemorySegmentContainer} to {@link MemorySegmentLeasePoolImpl} when reference count hits zero. Starts with one
  * initial reference. Internally uses a {@link Phaser} to track reference count in a non-blocking way.
  */
 public final class MemorySegmentLeaseImpl implements MemorySegmentLease {

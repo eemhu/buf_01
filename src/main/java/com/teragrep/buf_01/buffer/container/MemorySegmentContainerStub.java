@@ -43,57 +43,31 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.buf_01.buffer;
+package com.teragrep.buf_01.buffer.container;
 
 import java.lang.foreign.MemorySegment;
 
 /**
- * MemorySegmentLease is a decorator for {@link MemorySegmentContainer} with reference counter
+ * Stub implementation of the {@link MemorySegmentContainer}.
  */
-public interface MemorySegmentLease {
+public final class MemorySegmentContainerStub implements MemorySegmentContainer {
 
-    /**
-     * @return identity of the decorated {@link MemorySegmentContainer}.
-     */
-    public abstract long id();
+    public MemorySegmentContainerStub() {
 
-    /**
-     * @return current reference count.
-     */
-    public abstract long refs();
+    }
 
-    /**
-     * @return encapsulated MemorySegment of the {@link MemorySegmentContainer}.
-     */
-    public abstract MemorySegment memorySegment();
+    @Override
+    public long id() {
+        throw new IllegalStateException("MemorySegmentContainerStub does not have an id!");
+    }
 
-    /**
-     * Add reference, throws {@link IllegalStateException} if lease has expired.
-     */
-    public abstract void addRef() throws IllegalStateException;
+    @Override
+    public MemorySegment memorySegment() {
+        throw new IllegalStateException("MemorySegmentContainerStub does not allow access to the MemorySegment!");
+    }
 
-    /**
-     * Remove reference, throws {@link IllegalStateException} if lease has expired.
-     */
-    public abstract void removeRef() throws IllegalStateException;
-
-    /**
-     * @return status of the lease, {@code true} indicates that the lease has expired.
-     */
-    public abstract boolean isTerminated();
-
-    /**
-     * @return is this a stub implementation.
-     */
-    public abstract boolean isStub();
-
-    /**
-     * Provides a slice from the offset to the end of the segment.
-     * Registered as a sub lease.
-     * @param committedOffset start offset
-     * @return slice of the MemorySegmentLease, registered as a sublease.
-     */
-    public abstract MemorySegmentLease sliced(long committedOffset);
-
-    public abstract boolean isParentLease();
+    @Override
+    public boolean isStub() {
+        return true;
+    }
 }
