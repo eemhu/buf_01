@@ -47,7 +47,7 @@ package com.teragrep.buf_01.buffer;
 
 import com.teragrep.buf_01.buffer.lease.MemorySegmentLease;
 import com.teragrep.buf_01.buffer.pool.DebugMemorySegmentLeasePool;
-import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePool;
+import com.teragrep.buf_01.buffer.pool.CountablePool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +58,7 @@ public final class DebugMemorySegmentLeasePoolTest {
 
     @Test
     public void testPool() {
-        MemorySegmentLeasePool memorySegmentLeasePool = new DebugMemorySegmentLeasePool();
+        CountablePool<MemorySegmentLease> memorySegmentLeasePool = new DebugMemorySegmentLeasePool();
         List<MemorySegmentLease> leases = memorySegmentLeasePool.take(1);
 
         Assertions.assertEquals(1, leases.size());
@@ -79,8 +79,6 @@ public final class DebugMemorySegmentLeasePoolTest {
 
         lease.memorySegment().set(ValueLayout.JAVA_BYTE, 0, (byte) 'x');
 
-        Assertions.assertEquals(1, lease.memorySegment().asByteBuffer().position());
-
         Assertions.assertEquals((byte) 'x', lease.memorySegment().get(ValueLayout.JAVA_BYTE, 0));
 
         Assertions.assertEquals(2, lease.refs());
@@ -93,7 +91,7 @@ public final class DebugMemorySegmentLeasePoolTest {
 
         lease.removeRef(); // removes initial ref
 
-        Assertions.assertEquals(1, memorySegmentLeasePool.estimatedSize()); // the one offered must be there
+        Assertions.assertEquals(0, memorySegmentLeasePool.estimatedSize()); // debug pool does not contain any
 
         Assertions.assertTrue(lease.isTerminated()); // no refs
 

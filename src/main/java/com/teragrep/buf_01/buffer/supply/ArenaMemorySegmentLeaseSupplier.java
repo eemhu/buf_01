@@ -43,20 +43,53 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.buf_01.buffer.pool;
+package com.teragrep.buf_01.buffer.supply;
 
-import com.teragrep.buf_01.buffer.container.MemorySegmentContainer;
+import com.teragrep.buf_01.buffer.container.MemorySegmentContainerImpl;
 import com.teragrep.buf_01.buffer.lease.MemorySegmentLease;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLeaseImpl;
+import com.teragrep.buf_01.buffer.pool.CountablePool;
 
-import java.util.List;
+import java.lang.foreign.Arena;
+import java.lang.foreign.ValueLayout;
+import java.util.concurrent.atomic.AtomicLong;
 
-public interface MemorySegmentLeasePool {
+public final class ArenaMemorySegmentLeaseSupplier implements MemorySegmentLeaseSupplier {
 
-    List<MemorySegmentLease> take(long size);
+    private final Arena arena;
+    private final long count;
+    private final AtomicLong bufferId;
+    private final CountablePool<MemorySegmentLease> pool;
 
-    void close();
+    public ArenaMemorySegmentLeaseSupplier(
+            final Arena arena,
+            final long count,
+            final CountablePool<MemorySegmentLease> pool
+    ) {
+        this(arena, count, new AtomicLong(0L), pool);
+    }
 
-    int estimatedSize();
+    public ArenaMemorySegmentLeaseSupplier(
+            final Arena arena,
+            final long count,
+            final AtomicLong bufferId,
+            final CountablePool<MemorySegmentLease> pool
+    ) {
+        this.arena = arena;
+        this.count = count;
+        this.bufferId = bufferId;
+        this.pool = pool;
+    }
 
-    void internalOffer(MemorySegmentContainer container);
+    @Override
+    public MemorySegmentLease get() {
+        return new MemorySegmentLeaseImpl(
+                new MemorySegmentContainerImpl(bufferId.incrementAndGet(), arena.allocate(ValueLayout.JAVA_BYTE, count)), pool
+        );
+    }
+
+    @Override
+    public void close() {
+        arena.close();
+    }
 }

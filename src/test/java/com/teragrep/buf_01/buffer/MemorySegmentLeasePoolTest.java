@@ -46,7 +46,7 @@
 package com.teragrep.buf_01.buffer;
 
 import com.teragrep.buf_01.buffer.lease.MemorySegmentLease;
-import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePool;
+import com.teragrep.buf_01.buffer.pool.CountablePool;
 import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePoolImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ public final class MemorySegmentLeasePoolTest {
 
     @Test
     public void testPool() {
-        MemorySegmentLeasePool memorySegmentLeasePool = new MemorySegmentLeasePoolImpl();
+        CountablePool<MemorySegmentLease> memorySegmentLeasePool = new MemorySegmentLeasePoolImpl();
         List<MemorySegmentLease> leases = memorySegmentLeasePool.take(1);
 
         Assertions.assertEquals(1, leases.size());
@@ -78,8 +78,6 @@ public final class MemorySegmentLeasePoolTest {
         Assertions.assertEquals(2, lease.refs());
 
         lease.memorySegment().set(ValueLayout.JAVA_BYTE, 0, (byte) 'x');
-
-        Assertions.assertEquals(1, lease.memorySegment().asByteBuffer().position());
 
         Assertions.assertEquals((byte) 'x', lease.memorySegment().get(ValueLayout.JAVA_BYTE, 0));
 

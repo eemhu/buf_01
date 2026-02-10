@@ -43,15 +43,17 @@
  * Teragrep, the applicable Commercial License may apply to this file if you as
  * a licensee so wish it.
  */
-package com.teragrep.buf_01.buffer.supply;
+package com.teragrep.buf_01.buffer.pool;
 
-import java.lang.foreign.MemorySegment;
-import java.util.function.Supplier;
+import java.util.List;
 
-public interface MemorySegmentSupplier extends Supplier<MemorySegment>, AutoCloseable {
+public interface CountablePool<T> {
 
-    @Override
-    MemorySegment get();
+    List<T> take(long size);
 
     void close();
+
+    int estimatedSize();
+
+    void internalOffer(T countable);
 }

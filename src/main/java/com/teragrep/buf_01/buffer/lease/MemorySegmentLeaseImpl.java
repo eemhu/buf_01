@@ -47,7 +47,7 @@ package com.teragrep.buf_01.buffer.lease;
 
 import com.teragrep.buf_01.buffer.container.MemorySegmentContainer;
 import com.teragrep.buf_01.buffer.container.MemorySegmentContainerImpl;
-import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePool;
+import com.teragrep.buf_01.buffer.pool.CountablePool;
 import com.teragrep.buf_01.buffer.pool.MemorySegmentLeasePoolImpl;
 
 import java.lang.foreign.MemorySegment;
@@ -65,25 +65,25 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
 
     private final MemorySegmentContainer memorySegmentContainer;
     private final Phaser phaser;
-    private final MemorySegmentLeasePool memorySegmentLeasePool;
+    private final CountablePool<MemorySegmentLease> memorySegmentLeasePool;
     private final List<MemorySegmentLease> subLeases;
     private final MemorySegmentLease parentLease;
 
     public MemorySegmentLeaseImpl(
             MemorySegmentContainer bc,
-            MemorySegmentLeasePool memorySegmentLeasePool,
+            CountablePool<MemorySegmentLease> memorySegmentLeasePool,
             MemorySegmentLease parentLease
     ) {
         this.memorySegmentContainer = bc;
         this.memorySegmentLeasePool = memorySegmentLeasePool;
 
         // initial registered parties set to 1
-        this.phaser = new ClearingPhaser(1);
+        this.phaser = new ClearingPhaser(1, this);
         this.subLeases = new ArrayList<>();
         this.parentLease = parentLease;
     }
 
-    public MemorySegmentLeaseImpl(MemorySegmentContainer bc, MemorySegmentLeasePool memorySegmentLeasePool) {
+    public MemorySegmentLeaseImpl(MemorySegmentContainer bc, CountablePool<MemorySegmentLease> memorySegmentLeasePool) {
         this(bc, memorySegmentLeasePool, new MemorySegmentLeaseStub());
     }
 
@@ -166,8 +166,11 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
      */
     private class ClearingPhaser extends Phaser {
 
-        public ClearingPhaser(int initialParties) {
+        private final MemorySegmentLease lease;
+
+        public ClearingPhaser(int initialParties, MemorySegmentLease lease) {
             super(initialParties);
+            this.lease = lease;
         }
 
         @Override
@@ -175,7 +178,7 @@ public final class MemorySegmentLeaseImpl implements MemorySegmentLease {
             final boolean shouldTerminate;
             if (registeredParties == 0) {
                 memorySegment().fill((byte) 0);
-                memorySegmentLeasePool.internalOffer(memorySegmentContainer);
+                memorySegmentLeasePool.internalOffer(lease);
                 shouldTerminate = true;
             }
             else {

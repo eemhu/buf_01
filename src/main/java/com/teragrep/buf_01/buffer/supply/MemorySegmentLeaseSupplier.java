@@ -45,24 +45,14 @@
  */
 package com.teragrep.buf_01.buffer.supply;
 
-import java.lang.foreign.MemorySegment;
-import java.nio.ByteBuffer;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLease;
 
-public final class DirectByteBufferMemorySegmentSupplier implements MemorySegmentSupplier {
+import java.util.function.Supplier;
 
-    private final int count;
-
-    public DirectByteBufferMemorySegmentSupplier(final int count) {
-        this.count = count;
-    }
+public interface MemorySegmentLeaseSupplier extends Supplier<MemorySegmentLease>, AutoCloseable {
 
     @Override
-    public MemorySegment get() {
-        return MemorySegment.ofBuffer(ByteBuffer.allocateDirect(count));
-    }
+    MemorySegmentLease get();
 
-    @Override
-    public void close() {
-        // no-op
-    }
+    void close();
 }
