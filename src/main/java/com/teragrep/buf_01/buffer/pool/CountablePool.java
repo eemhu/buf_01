@@ -45,11 +45,9 @@
  */
 package com.teragrep.buf_01.buffer.pool;
 
-import java.util.List;
-
 public interface CountablePool<T> {
 
-    List<T> take(long size);
+    T take();
 
     void close();
 

@@ -99,6 +99,9 @@ public final class DebugMemorySegmentLeasePool implements CountablePool<Lease<Me
     }
 
     public Lease<MemorySegment> take() {
+        if (close.get()) {
+            return new MemorySegmentLeaseStub();
+        }
         // get or create
         Lease<MemorySegment> lease = queue.poll();
         if (lease == null) {
@@ -118,28 +121,6 @@ public final class DebugMemorySegmentLeasePool implements CountablePool<Lease<Me
         }
 
         return lease;
-    }
-
-    /**
-     * @param size minimum size of the {@link Lease}s requested.
-     * @return list of {@link Lease}s meeting or exceeding the size requested.
-     */
-    public List<Lease<MemorySegment>> take(long size) {
-        if (close.get()) {
-            return Collections.singletonList(leaseStub);
-        }
-
-        LOGGER.debug("requesting take with size <{}>", size);
-        long currentSize = 0;
-        List<Lease<MemorySegment>> leases = new LinkedList<>();
-        while (currentSize < size) {
-            Lease<MemorySegment> lease = take();
-            leases.add(lease);
-            currentSize = currentSize + lease.leasedObject().byteSize();
-
-        }
-        return leases;
-
     }
 
     /**
