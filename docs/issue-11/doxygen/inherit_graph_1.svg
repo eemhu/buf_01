@@ -40,7 +40,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="classcom_1_1teragrep_1_1buf__01_1_1buffer_1_1lease_1_1TrackedMemorySegmentLease.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="classcom_1_1teragrep_1_1buf__01_1_1buffer_1_1lease_1_1TrackedMemorySegmentLease.html" target="_top" xlink:title="Decorates a MemorySegmentLease, providing position, limit and iteration methods.">
 <polygon fill="white" stroke="#666666" points="398,-30 217,-30 217,0 398,0 398,-30"/>
 <text text-anchor="start" x="225" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">com.teragrep.buf_01.buffer.lease.</text>
 <text text-anchor="middle" x="307.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">TrackedMemorySegmentLease</text>

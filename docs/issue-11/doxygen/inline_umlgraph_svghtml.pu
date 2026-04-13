@@ -98,6 +98,34 @@ Collaborators:
 end note
 @enduml
 @startuml inline_umlgraph_6.svg
+class TrackedMemorySegmentLease {
++ id();
++ refs();
++ leasedObject();
++ hasZeroRefs();
++ sliceAt(offset);
++ isStub();
++ close();
++ hasNext();
++ next();
++ write(byte);
++ currentPosition();
++ position(pos);
++ currentLimit();
++ limit(lim);
+}
+
+TrackedMemorySegmentLease --> MemorySegmentLease : decorates
+
+note right of TrackedMemorySegmentLease
+Responsibilities:
+- Decorates MemorySegmentLease, providing position, limit and iteration.
+
+Collaborators:
+- MemorySegmentLease
+end note
+@enduml
+@startuml inline_umlgraph_7.svg
 class DebugMemorySegmentLeasePool {
 + get();
 + offer(lease);
@@ -114,7 +142,7 @@ Collaborators:
 - MemorySegmentLease
 end note
 @enduml
-@startuml inline_umlgraph_7.svg
+@startuml inline_umlgraph_8.svg
 interface MultiGet
 interface Pool
 class LeaseMultiGet {
@@ -130,7 +158,7 @@ Collaborators:
 - Pool
 end note
 @enduml
-@startuml inline_umlgraph_8.svg
+@startuml inline_umlgraph_9.svg
 interface MultiGet {
 + get(count);
 }
@@ -143,7 +171,7 @@ Collaborators:
 - Pool
 end note
 @enduml
-@startuml inline_umlgraph_9.svg
+@startuml inline_umlgraph_10.svg
 interface Pool
 interface OpenableLease
 class OpeningPool {
@@ -165,7 +193,7 @@ Collaborators:
 - OpenableLease
 end note
 @enduml
-@startuml inline_umlgraph_10.svg
+@startuml inline_umlgraph_11.svg
 class ArenaMemorySegmentLeaseSupplier {
 + apply(poolRef);
 + accept(lease);
