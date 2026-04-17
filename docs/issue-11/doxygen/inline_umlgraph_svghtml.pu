@@ -98,7 +98,8 @@ Collaborators:
 end note
 @enduml
 @startuml inline_umlgraph_6.svg
-class TrackedLease {
+interface Lease
+interface TrackedLease {
 + hasNext();
 + next();
 + write(b);
