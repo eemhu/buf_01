@@ -46,60 +46,43 @@
 package com.teragrep.buf_01.buffer.lease.collection;
 
 import com.teragrep.buf_01.buffer.lease.TrackedLease;
+import com.teragrep.stb_01.Stubable;
 
-import java.lang.foreign.MemorySegment;
-import java.util.Arrays;
-import java.util.Objects;
+// spotless:off
+/**
+ * @interface NextTrackedLease
+ * @brief Next tracked lease in a tracked lease collection
+ *
+ * @responsibilities
+ * - Provides the index and the access to the next available lease in the collection of tracked leases
+ *
+ * @collaborators
+ * - TrackedLeaseCollection
+ * - TrackedLease
+ *
+ * @startuml
+ * interface NextTrackedLease {
+ * + index();
+ * + lease();
+ * }
+ *
+ * NextTrackedLease --> TrackedLeaseCollection : next available lease
+ *
+ * note right of NextTrackedLease
+ * Responsibilities:
+ * - Provides the index and the access to the next available lease in the collection of tracked leases
+ *
+ * Collaborators:
+ * - TrackedLeaseCollection
+ * - TrackedLease
+ * end note
+ *
+ * @enduml
+*/
+// spotless:on
+public interface NextTrackedLease<T> extends Stubable {
 
-public final class TrackedMemorySegmentLeaseCollection implements TrackedLeaseCollection<MemorySegment> {
+    public abstract long index();
 
-    private static final NextTrackedLease<MemorySegment> nextTrackedLeaseStub = new NextTrackedLeaseStub();
-    private final TrackedLease<MemorySegment>[] leases;
-
-    public TrackedMemorySegmentLeaseCollection(final TrackedLease<MemorySegment>[] leases) {
-        this.leases = leases;
-    }
-
-    public NextTrackedLease<MemorySegment> next() {
-        NextTrackedLease<MemorySegment> rv = nextTrackedLeaseStub;
-        for (int i = 0; i < leases.length; i++) {
-            final TrackedLease<MemorySegment> lease = leases[i];
-            if (lease.hasNext()) {
-                rv = new NextTrackedLeaseImpl(lease, i);
-                break;
-            }
-        }
-
-        return rv;
-    }
-
-    @Override
-    public TrackedLease<MemorySegment>[] leases() {
-        return leases;
-    }
-
-    public void close() {
-        for (final TrackedLease<MemorySegment> lease : leases) {
-            lease.close();
-        }
-    }
-
-    @Override
-    public boolean isStub() {
-        return false;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final TrackedMemorySegmentLeaseCollection that = (TrackedMemorySegmentLeaseCollection) o;
-        return Objects.deepEquals(leases, that.leases);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(leases);
-    }
+    public abstract TrackedLease<T> lease();
 }

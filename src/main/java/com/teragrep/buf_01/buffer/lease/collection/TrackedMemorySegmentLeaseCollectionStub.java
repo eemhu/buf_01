@@ -68,7 +68,7 @@ public final class TrackedMemorySegmentLeaseCollectionStub implements TrackedLea
     }
 
     @Override
-    public boolean hasNext() {
+    public NextTrackedLease<MemorySegment> next() {
         throw new UnsupportedOperationException("Stub object does not implement hasNext()");
     }
 

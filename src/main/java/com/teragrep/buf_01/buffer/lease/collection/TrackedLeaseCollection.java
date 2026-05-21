@@ -53,7 +53,7 @@ public interface TrackedLeaseCollection<T> extends Stubable, AutoCloseable {
     @Override
     public abstract void close();
 
-    public abstract boolean hasNext();
+    public abstract NextTrackedLease<T> next();
 
     public abstract TrackedLease<T>[] leases();
 }

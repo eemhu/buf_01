@@ -48,45 +48,33 @@ package com.teragrep.buf_01.buffer.lease.collection;
 import com.teragrep.buf_01.buffer.lease.TrackedLease;
 
 import java.lang.foreign.MemorySegment;
-import java.util.Arrays;
 import java.util.Objects;
 
-public final class TrackedMemorySegmentLeaseCollection implements TrackedLeaseCollection<MemorySegment> {
+public final class NextTrackedLeaseStub implements NextTrackedLease<MemorySegment> {
 
-    private static final NextTrackedLease<MemorySegment> nextTrackedLeaseStub = new NextTrackedLeaseStub();
-    private final TrackedLease<MemorySegment>[] leases;
+    private final boolean isStub;
 
-    public TrackedMemorySegmentLeaseCollection(final TrackedLease<MemorySegment>[] leases) {
-        this.leases = leases;
+    public NextTrackedLeaseStub() {
+        this(true);
     }
 
-    public NextTrackedLease<MemorySegment> next() {
-        NextTrackedLease<MemorySegment> rv = nextTrackedLeaseStub;
-        for (int i = 0; i < leases.length; i++) {
-            final TrackedLease<MemorySegment> lease = leases[i];
-            if (lease.hasNext()) {
-                rv = new NextTrackedLeaseImpl(lease, i);
-                break;
-            }
-        }
-
-        return rv;
+    private NextTrackedLeaseStub(final boolean isStub) {
+        this.isStub = isStub;
     }
 
     @Override
-    public TrackedLease<MemorySegment>[] leases() {
-        return leases;
+    public long index() {
+        throw new UnsupportedOperationException("index() is not supported for NextTrackedLeaseStub");
     }
 
-    public void close() {
-        for (final TrackedLease<MemorySegment> lease : leases) {
-            lease.close();
-        }
+    @Override
+    public TrackedLease<MemorySegment> lease() {
+        throw new UnsupportedOperationException("lease() is not supported for NextTrackedLeaseStub");
     }
 
     @Override
     public boolean isStub() {
-        return false;
+        return isStub;
     }
 
     @Override
@@ -94,12 +82,12 @@ public final class TrackedMemorySegmentLeaseCollection implements TrackedLeaseCo
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final TrackedMemorySegmentLeaseCollection that = (TrackedMemorySegmentLeaseCollection) o;
-        return Objects.deepEquals(leases, that.leases);
+        final NextTrackedLeaseStub that = (NextTrackedLeaseStub) o;
+        return isStub == that.isStub;
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(leases);
+        return Objects.hashCode(isStub);
     }
 }

@@ -45,61 +45,40 @@
  */
 package com.teragrep.buf_01.buffer.lease.collection;
 
-import com.teragrep.buf_01.buffer.lease.TrackedLease;
+import com.teragrep.buf_01.buffer.lease.MemorySegmentLeaseStub;
+import com.teragrep.buf_01.buffer.lease.TrackedMemorySegmentLease;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.foreign.MemorySegment;
-import java.util.Arrays;
-import java.util.Objects;
 
-public final class TrackedMemorySegmentLeaseCollection implements TrackedLeaseCollection<MemorySegment> {
+public final class NextTrackedLeaseTest {
 
-    private static final NextTrackedLease<MemorySegment> nextTrackedLeaseStub = new NextTrackedLeaseStub();
-    private final TrackedLease<MemorySegment>[] leases;
-
-    public TrackedMemorySegmentLeaseCollection(final TrackedLease<MemorySegment>[] leases) {
-        this.leases = leases;
+    @Test
+    void testEqualsContract() {
+        EqualsVerifier.forClass(NextTrackedLease.class).verify();
     }
 
-    public NextTrackedLease<MemorySegment> next() {
-        NextTrackedLease<MemorySegment> rv = nextTrackedLeaseStub;
-        for (int i = 0; i < leases.length; i++) {
-            final TrackedLease<MemorySegment> lease = leases[i];
-            if (lease.hasNext()) {
-                rv = new NextTrackedLeaseImpl(lease, i);
-                break;
-            }
-        }
-
-        return rv;
+    @Test
+    void testStubEqualsContract() {
+        EqualsVerifier.forClass(NextTrackedLeaseStub.class).verify();
     }
 
-    @Override
-    public TrackedLease<MemorySegment>[] leases() {
-        return leases;
+    @Test
+    void testNonStub() {
+        final NextTrackedLease<MemorySegment> nextTrackedLease = new NextTrackedLeaseImpl(
+                new TrackedMemorySegmentLease(new MemorySegmentLeaseStub()),
+                0L
+        );
+        Assertions.assertEquals(0L, nextTrackedLease.index());
+        Assertions.assertEquals(TrackedMemorySegmentLease.class, nextTrackedLease.lease().getClass());
     }
 
-    public void close() {
-        for (final TrackedLease<MemorySegment> lease : leases) {
-            lease.close();
-        }
-    }
-
-    @Override
-    public boolean isStub() {
-        return false;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final TrackedMemorySegmentLeaseCollection that = (TrackedMemorySegmentLeaseCollection) o;
-        return Objects.deepEquals(leases, that.leases);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(leases);
+    @Test
+    void testStub() {
+        final NextTrackedLease<MemorySegment> nextTrackedLease = new NextTrackedLeaseStub();
+        Assertions.assertThrows(UnsupportedOperationException.class, nextTrackedLease::index);
+        Assertions.assertThrows(UnsupportedOperationException.class, nextTrackedLease::lease);
     }
 }

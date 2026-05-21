@@ -48,40 +48,26 @@ package com.teragrep.buf_01.buffer.lease.collection;
 import com.teragrep.buf_01.buffer.lease.TrackedLease;
 
 import java.lang.foreign.MemorySegment;
-import java.util.Arrays;
 import java.util.Objects;
 
-public final class TrackedMemorySegmentLeaseCollection implements TrackedLeaseCollection<MemorySegment> {
+public final class NextTrackedLeaseImpl implements NextTrackedLease<MemorySegment> {
 
-    private static final NextTrackedLease<MemorySegment> nextTrackedLeaseStub = new NextTrackedLeaseStub();
-    private final TrackedLease<MemorySegment>[] leases;
+    private final TrackedLease<MemorySegment> trackedLease;
+    private final long index;
 
-    public TrackedMemorySegmentLeaseCollection(final TrackedLease<MemorySegment>[] leases) {
-        this.leases = leases;
-    }
-
-    public NextTrackedLease<MemorySegment> next() {
-        NextTrackedLease<MemorySegment> rv = nextTrackedLeaseStub;
-        for (int i = 0; i < leases.length; i++) {
-            final TrackedLease<MemorySegment> lease = leases[i];
-            if (lease.hasNext()) {
-                rv = new NextTrackedLeaseImpl(lease, i);
-                break;
-            }
-        }
-
-        return rv;
+    public NextTrackedLeaseImpl(final TrackedLease<MemorySegment> trackedLease, final long index) {
+        this.trackedLease = trackedLease;
+        this.index = index;
     }
 
     @Override
-    public TrackedLease<MemorySegment>[] leases() {
-        return leases;
+    public long index() {
+        return index;
     }
 
-    public void close() {
-        for (final TrackedLease<MemorySegment> lease : leases) {
-            lease.close();
-        }
+    @Override
+    public TrackedLease<MemorySegment> lease() {
+        return trackedLease;
     }
 
     @Override
@@ -94,12 +80,12 @@ public final class TrackedMemorySegmentLeaseCollection implements TrackedLeaseCo
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final TrackedMemorySegmentLeaseCollection that = (TrackedMemorySegmentLeaseCollection) o;
-        return Objects.deepEquals(leases, that.leases);
+        final NextTrackedLeaseImpl that = (NextTrackedLeaseImpl) o;
+        return index == that.index && Objects.equals(trackedLease, that.trackedLease);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(leases);
+        return Objects.hash(trackedLease, index);
     }
 }

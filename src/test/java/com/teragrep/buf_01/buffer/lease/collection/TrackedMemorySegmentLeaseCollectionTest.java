@@ -81,12 +81,14 @@ public final class TrackedMemorySegmentLeaseCollectionTest {
             ) {
                 Assertions.assertEquals(5, collection.leases().length);
                 Assertions.assertFalse(collection.isStub());
-                Assertions.assertTrue(collection.hasNext());
+                Assertions.assertFalse(collection.next().isStub());
+                Assertions.assertEquals(0L, collection.next().index());
 
                 // Scroll through each of the leases
                 {
                     int i;
                     for (i = 0; i < collection.leases().length; i++) {
+                        Assertions.assertEquals(i, collection.next().index());
                         final TrackedLease<MemorySegment> lease = collection.leases()[i];
                         while (lease.hasNext()) {
                             lease.next();
@@ -94,7 +96,7 @@ public final class TrackedMemorySegmentLeaseCollectionTest {
                     }
                     Assertions.assertEquals(5, i);
                 }
-                Assertions.assertFalse(collection.hasNext());
+                Assertions.assertTrue(collection.next().isStub());
             }
 
             // After close leases should be closed
@@ -112,7 +114,7 @@ public final class TrackedMemorySegmentLeaseCollectionTest {
     void testStubCollection() {
         final TrackedLeaseCollection<MemorySegment> collection = new TrackedMemorySegmentLeaseCollectionStub();
         Assertions.assertTrue(collection.isStub());
-        Assertions.assertThrows(UnsupportedOperationException.class, collection::hasNext);
+        Assertions.assertThrows(UnsupportedOperationException.class, collection::next);
         Assertions.assertThrows(UnsupportedOperationException.class, collection::leases);
         Assertions.assertThrows(UnsupportedOperationException.class, collection::close);
     }
