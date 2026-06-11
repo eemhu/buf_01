@@ -22,7 +22,7 @@ interface Lease {
 + leasedObject();
 + hasZeroRefs();
 + sliceAt(offset);
-+ sliceBetween(offset, length);
++ sliceWithLength(offset, length);
 }
 Lease --> Pool : returned lease
 Lease --> MemorySegmentContainer : reference tracked access
