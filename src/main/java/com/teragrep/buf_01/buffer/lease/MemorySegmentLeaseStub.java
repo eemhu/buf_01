@@ -94,6 +94,11 @@ public final class MemorySegmentLeaseStub implements OpenableLease<MemorySegment
     }
 
     @Override
+    public Lease<MemorySegment> sliceWithLength(final long offset, final long length) {
+        throw new IllegalStateException("MemorySegmentLeaseStub does not allow slicing!");
+    }
+
+    @Override
     public void close() {
         throw new IllegalStateException("MemorySegmentLeaseStub cannot be closed!");
     }

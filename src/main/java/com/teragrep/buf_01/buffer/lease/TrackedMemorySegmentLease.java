@@ -67,6 +67,7 @@ import java.util.Objects;
  * + leasedObject();
  * + hasZeroRefs();
  * + sliceAt(offset);
+ * + sliceBetween(offset, length);
  * + isStub();
  * + close();
  * + hasNext();
@@ -97,6 +98,7 @@ public final class TrackedMemorySegmentLease implements TrackedLease<MemorySegme
     private final Lease<MemorySegment> origin;
     private long currentOffset;
     private long limit;
+    private long mark;
 
     public TrackedMemorySegmentLease(final Lease<MemorySegment> origin) {
         this(origin, 0L);
@@ -107,9 +109,19 @@ public final class TrackedMemorySegmentLease implements TrackedLease<MemorySegme
     }
 
     public TrackedMemorySegmentLease(final Lease<MemorySegment> origin, final long currentOffset, final long limit) {
+        this(origin, currentOffset, limit, -1L);
+    }
+
+    public TrackedMemorySegmentLease(
+            final Lease<MemorySegment> origin,
+            final long currentOffset,
+            final long limit,
+            final long mark
+    ) {
         this.origin = origin;
         this.currentOffset = currentOffset;
         this.limit = limit;
+        this.mark = mark;
     }
 
     @Override
@@ -135,6 +147,11 @@ public final class TrackedMemorySegmentLease implements TrackedLease<MemorySegme
     @Override
     public TrackedLease<MemorySegment> sliceAt(final long offset) {
         return new TrackedMemorySegmentLease(origin.sliceAt(offset));
+    }
+
+    @Override
+    public Lease<MemorySegment> sliceWithLength(final long offset, final long length) {
+        return new TrackedMemorySegmentLease(origin.sliceWithLength(offset, length));
     }
 
     @Override
@@ -232,16 +249,59 @@ public final class TrackedMemorySegmentLease implements TrackedLease<MemorySegme
     }
 
     @Override
+    public void mark() {
+        this.mark = currentPosition();
+    }
+
+    @Override
+    public long currentMark() {
+        return mark;
+    }
+
+    @Override
+    public void reset() {
+        final long currentLimit = currentLimit();
+        if (mark < 0) {
+            throw new IndexOutOfBoundsException("The mark is not set, cannot reset position to mark!");
+        }
+        else if (mark > currentLimit && currentLimit != -1) {
+            throw new IndexOutOfBoundsException(
+                    "The mark is set higher than the current limit, cannot set position to mark! (mark=<[" + mark
+                            + "]>, limit=<[" + limit + "]>)"
+            );
+        }
+
+        position(mark);
+    }
+
+    @Override
+    public void rewind() {
+        position(0L);
+        this.mark = -1L;
+    }
+
+    @Override
+    public long remaining() {
+        if (currentLimit() < 0) {
+            throw new IllegalArgumentException(
+                    "The limit is not set, cannot calculate bytes remaining between current position and limit!"
+            );
+        }
+        return currentLimit() - currentPosition();
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         final TrackedMemorySegmentLease that = (TrackedMemorySegmentLease) o;
-        return currentOffset == that.currentOffset && limit == that.limit && Objects.equals(origin, that.origin);
+        return currentOffset == that.currentOffset && limit == that.limit && mark == that.mark
+                && Objects.equals(origin, that.origin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(origin, currentOffset, limit);
+        return Objects.hash(origin, currentOffset, limit, mark);
     }
 }
