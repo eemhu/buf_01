@@ -67,7 +67,7 @@ import java.util.Objects;
  * + leasedObject();
  * + hasZeroRefs();
  * + sliceAt(offset);
- * + sliceBetween(offset, length);
+ * + sliceWithLength(offset, length);
  * + isStub();
  * + close();
  * + hasNext();
