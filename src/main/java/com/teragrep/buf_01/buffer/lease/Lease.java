@@ -66,7 +66,7 @@ import com.teragrep.stb_01.Stubable;
  * + leasedObject();
  * + hasZeroRefs();
  * + sliceAt(offset);
- * + sliceBetween(offset, length);
+ * + sliceWithLength(offset, length);
  * }
  * Lease --> Pool : returned lease
  * Lease --> MemorySegmentContainer : reference tracked access
