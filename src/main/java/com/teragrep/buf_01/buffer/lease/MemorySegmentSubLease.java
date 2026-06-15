@@ -108,6 +108,21 @@ public final class MemorySegmentSubLease implements Lease<MemorySegment> {
     }
 
     @Override
+    public Lease<MemorySegment> sliceWithLength(final long offset, final long length) {
+        if (phaser.getRegisteredParties() == 0) {
+            throw new IllegalStateException("Cannot provide slice, ref count = 0 !");
+        }
+
+        return new MemorySegmentSubLease(
+                new MemorySegmentContainerImpl(
+                        memorySegmentContainer.id(),
+                        memorySegmentContainer.memorySegment().asSlice(offset, length)
+                ),
+                phaser
+        );
+    }
+
+    @Override
     public long id() {
         return memorySegmentContainer.id();
     }

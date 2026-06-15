@@ -119,6 +119,17 @@ public final class MemorySegmentLease implements OpenableLease<MemorySegment> {
     }
 
     @Override
+    public Lease<MemorySegment> sliceWithLength(final long offset, final long length) {
+        return new MemorySegmentSubLease(
+                new MemorySegmentContainerImpl(
+                        memorySegmentContainer.id(),
+                        memorySegmentContainer.memorySegment().asSlice(offset, length)
+                ),
+                phaser
+        );
+    }
+
+    @Override
     public long id() {
         return memorySegmentContainer.id();
     }

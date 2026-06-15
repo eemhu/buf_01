@@ -66,6 +66,7 @@ import com.teragrep.stb_01.Stubable;
  * + leasedObject();
  * + hasZeroRefs();
  * + sliceAt(offset);
+ * + sliceWithLength(offset, length);
  * }
  * Lease --> Pool : returned lease
  * Lease --> MemorySegmentContainer : reference tracked access
@@ -110,6 +111,15 @@ public interface Lease<T> extends AutoCloseable, Stubable {
      * @return slice of the lease, registered as a sublease.
      */
     public abstract Lease<T> sliceAt(long offset);
+
+    /**
+     * Provides a slice from the given offset for the length given. Registered as a sub lease.
+     * 
+     * @param offset start offset
+     * @param length length from start offset
+     * @return slice of the lease, registered as a sublease.
+     */
+    public abstract Lease<T> sliceWithLength(long offset, long length);
 
     @Override
     public abstract void close();

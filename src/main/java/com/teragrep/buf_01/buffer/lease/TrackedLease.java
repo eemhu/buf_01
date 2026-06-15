@@ -113,4 +113,15 @@ public interface TrackedLease<T> extends Lease<T> {
     public abstract void limit(final long newLimit);
 
     public abstract void flip();
+
+    public abstract void mark(); // set mark at current position
+
+    public abstract long currentMark();
+
+    public abstract void reset(); // reset buffer position to mark
+
+    public abstract void rewind(); // pos=0 and mark discarded
+
+    public abstract long remaining(); // limit-pos
+
 }
